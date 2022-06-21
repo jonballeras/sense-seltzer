@@ -1,0 +1,222 @@
+<div class="age-gate-wrapper" id="age-gate-popup">
+    <div class="age-gate">
+        <div class="age-gate__content">
+            {%- if section.settings.logo_age_check != blank -%}
+            <img srcset="{{ section.settings.logo_age_check | img_url: '400x' }} 1x, {{ section.settings.logo_age_check | img_url: '400x', scale: 2 }} 2x"
+                src="{{ section.settings.logo_age_check | img_url: '400x' }}"
+                loading="lazy"
+                class="age-gate__logo"
+                width="{{ section.settings.logo_age_check.width }}"
+                height="{{ section.settings.logo_age_check.height }}"
+                alt="{{ shop.name }}"
+            >
+            {%- else -%}
+            {%- endif -%}
+            <div class="age-gate__context">
+                <h2>{{ section.settings.heading }}</h2>
+                {{ section.settings.content }}
+            </div>
+            <div class="age-gate__reject hidden">
+                <h2>{{ section.settings.heading_reject }}</h2>
+                {{ section.settings.content_reject }}
+            </div>
+
+            <div class="age-gate__buttons">
+                <button id="submit_birthdate" class="button button-enter" onclick="ageCheck()">{{ 'Yes' }}</button>
+                <button class="button age-gate-submit-no" onclick="ageCheckReject()">{{ 'No' }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function ageCheck() {
+    var days = 14; //number of days until they must go through the age checker again.
+    var date = new Date();
+    date.setTime(date.getTime()+(days*24*60*60*1000));
+    var expires = "; expires="+date.toGMTString();
+    document.cookie = 'isAnAdult=true;'+expires+"; path=/";
+    location.reload();
+};
+
+function ageCheckReject() {
+    const contextDefault = document.querySelector('.age-gate__context');
+    const contextReject = document.querySelector('.age-gate__reject');
+    const ageGateButtons = document.querySelector('.age-gate__buttons');
+
+    contextDefault.classList.add('hidden');
+    ageGateButtons.classList.add('hidden');
+    contextReject.classList.remove('hidden');
+};  
+  
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+};
+
+const isAnAdult = readCookie('isAnAdult');
+if (isAnAdult) {
+    document.body.classList.remove('age-restriction');
+    document.getElementById('age-gate-popup').style.display = 'none';
+} else {
+    document.body.classList.add('age-restriction');
+    document.getElementById('age-gate-popup').style.display = 'block';
+};
+</script>
+
+<style>
+.age-restriction {
+    height: 100vh;
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+}
+#age-gate-popup {
+    {%- if section.settings.color_background != '' -%}
+    background: {{ section.settings.color_background }};
+    {%- else -%}
+    background: rgba(0, 0, 0, 1);
+    {%- endif -%}
+    {%- if section.settings.color_text != '' -%}
+    color: {{ section.settings.color_text }};
+    {%- else -%}
+    color: #FFFFFF;
+    {%- endif -%}
+    height: 100vh;
+    width: 100vw;
+    overflow-y: auto;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 999;
+}
+
+.age-gate {
+    height: 100%;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.age-gate__content {
+    max-width: 500px;
+    padding: 50px 20px;
+    width: 100%;
+    text-align: center;
+  	display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.age-gate__content img {
+    display: block;
+    height: auto;
+    margin: 0 auto;
+    max-width: 100%;
+}
+
+.age-gate__content .headline {
+  margin:47px 0;
+    max-width: 300px;
+}
+.age-gate__content h2 {
+    color: inherit;
+    margin: 2rem 0 1rem;
+}
+
+.age-gate__content p {
+    line-height: 1.6;
+    margin: 0;
+}
+.age-gate__content .hidden {
+  display: none;
+}
+.age-gate__buttons {
+    display: flex;
+    justify-content: center;
+    margin-top: 3rem;
+}
+
+.age-gate__buttons .button {
+    margin: 0 1rem;
+    text-transform: uppercase;
+  	border: none;
+  	box-shadow: none;
+  	padding: 10px 20px;
+    min-width: 100px;
+  	{%- if section.settings.color_text != '' -%}
+    background-color: {{ section.settings.color_text }};
+    {%- else -%}
+    background-color: #000000;
+    {%- endif -%}
+  	{%- if section.settings.color_button != '' -%}
+    color: {{ section.settings.color_button }};
+    {%- else -%}
+    color: #000000;
+    {%- endif -%}
+ 	border-radius: 2px;
+}
+.age-gate__buttons .button:hover {
+  border:none;
+  box-shadow: none;
+}
+</style>
+
+
+{% schema %}
+{
+    "name": "Age Gate Popup",
+    "tag": "section",
+    "settings": [
+        {
+            "type": "color",
+            "id": "color_background",
+            "label": "Overlay color"
+        },
+        {
+            "type": "color",
+            "id": "color_text",
+            "label": "Text color"
+        },
+		{
+            "type": "color",
+            "id": "color_button",
+            "label": "Button text color"
+        },
+        {
+            "type": "image_picker",
+            "id": "logo_age_check",
+            "label": "Logo"
+        },
+        {
+            "type": "text",
+            "id": "heading",
+            "label": "Heading"
+        },
+        {
+            "type": "richtext",
+            "id": "content",
+            "label": "Context"
+        },
+        {
+            "type": "text",
+            "id": "heading_reject",
+            "label": "Reject heading"
+        },
+        {
+            "type": "richtext",
+            "id": "content_reject",
+            "label": "Reject context"
+        }
+    ]
+}
+{% endschema %}
