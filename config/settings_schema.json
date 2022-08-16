@@ -1155,7 +1155,7 @@
         "type": "text",
         "id": "fixed_tax",
         "label": "Tax value",
-        "default": "230"
+        "default": "34"
       },
       {
         "type": "checkbox",
